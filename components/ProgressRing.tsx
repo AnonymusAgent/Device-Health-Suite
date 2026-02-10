@@ -47,7 +47,7 @@ export function ProgressRing({
           strokeLinecap="round"
         />
       </Svg>
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <View style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           {label && (
             <Text style={{ color: Colors.dark.text, fontSize: size * 0.22, fontWeight: '700' as const }}>

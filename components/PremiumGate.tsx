@@ -12,7 +12,7 @@ interface PremiumGateProps {
 }
 
 export function PremiumGate({ children, feature = 'This feature' }: PremiumGateProps) {
-  const { isPremium, togglePremium } = usePremium();
+  const { isPremium, showPaywall } = usePremium();
 
   if (isPremium) return <>{children}</>;
 
@@ -35,7 +35,7 @@ export function PremiumGate({ children, feature = 'This feature' }: PremiumGateP
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              togglePremium();
+              showPaywall();
             }}
             style={({ pressed }) => [styles.button, pressed && { opacity: 0.85 }]}
           >

@@ -19,7 +19,7 @@ export default function DashboardScreen() {
   const [ramHistory, setRamHistory] = useState<number[]>([55, 58, 52, 60, 57, 62, 59, 55, 63, 61]);
   const [batteryHistory, setBatteryHistory] = useState<number[]>([]);
   const [healthScore, setHealthScore] = useState(0);
-  const { isPremium, togglePremium } = usePremium();
+  const { isPremium, showPaywall } = usePremium();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadInfo = useCallback(async () => {
@@ -97,7 +97,7 @@ export default function DashboardScreen() {
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              togglePremium();
+              if (!isPremium) showPaywall();
             }}
             style={({ pressed }) => [styles.premiumBtn, pressed && { opacity: 0.8 }]}
           >
@@ -204,14 +204,20 @@ export default function DashboardScreen() {
         </View>
 
         {!isPremium && (
-          <View style={styles.promoCard}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              showPaywall();
+            }}
+            style={({ pressed }) => [styles.promoCard, pressed && { opacity: 0.85 }]}
+          >
             <MaterialCommunityIcons name="crown" size={22} color={Colors.dark.secondary} />
             <View style={styles.promoText}>
               <Text style={styles.promoTitle}>Unlock Premium</Text>
               <Text style={styles.promoDesc}>Stress tests, advanced graphs, and exportable reports</Text>
             </View>
             <MaterialCommunityIcons name="chevron-right" size={20} color={Colors.dark.textTertiary} />
-          </View>
+          </Pressable>
         )}
       </ScrollView>
     </View>
