@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import { router } from 'expo-router';
 import { useColors, useSettings } from '@/contexts/SettingsContext';
-import { useSession } from '@/contexts/SessionContext';
+import { useSessionControls } from '@/contexts/SessionContext';
+import { useDevice } from '@/contexts/DeviceContext';
 import { useReports } from '@/contexts/ReportsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { Badge, Button, Card, IconTile, Notice, Page, PageHeader, SectionHeading, SegmentedControl, Text, type IconName } from '@/components/ui';
@@ -29,7 +30,8 @@ function BenchmarkCard({ kind, running, busy, progress, result, onStart, onStop,
 export default function BenchmarksScreen() {
   const c = useColors();
   const { width } = useWindowDimensions();
-  const { snapshot } = useSession();
+  const { snapshot } = useDevice();
+  const { setBenchmarkRunning } = useSessionControls();
   const { preferences } = useSettings();
   const { saveReport, ready } = useReports();
   const { show } = useToast();
@@ -45,7 +47,7 @@ export default function BenchmarksScreen() {
     if (runningGuard.current) return;
     runningGuard.current = true;
     const abort = new AbortController(); controller.current = abort;
-    setActive(kind); setProgress(null); setResults(previous => ({ ...previous, [kind]: null }));
+    setActive(kind); setBenchmarkRunning(true); setProgress(null); setResults(previous => ({ ...previous, [kind]: null }));
     try {
       const result = await runBenchmark(kind, { durationMs, maxMemoryMiB: 16 }, value => { if (mounted.current) setProgress(value); }, abort.signal);
       if (!mounted.current) return;
@@ -58,7 +60,7 @@ export default function BenchmarksScreen() {
     } catch {
       if (mounted.current) show('The check could not start. Please try again.', true);
     } finally {
-      runningGuard.current = false;
+      runningGuard.current = false; setBenchmarkRunning(false);
       if (mounted.current) setActive(null);
     }
   };

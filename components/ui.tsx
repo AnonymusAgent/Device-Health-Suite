@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Modal, Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, Text as RNText, View, type StyleProp, type TextProps, type TextStyle, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useColors } from '@/contexts/SettingsContext';
+import { useColors, useSettings } from '@/contexts/SettingsContext';
 export type IconName = keyof typeof Ionicons.glyphMap;
 export type Tone = 'good' | 'info' | 'warning' | 'danger' | 'neutral';
 
@@ -16,7 +16,8 @@ export function Button({ label, onPress, icon, variant = 'primary', disabled, lo
   label: string; onPress: () => void; icon?: IconName; variant?: 'primary' | 'secondary' | 'ghost' | 'danger'; disabled?: boolean; loading?: boolean; small?: boolean; style?: StyleProp<ViewStyle>; accessibilityLabel?: string;
 }) {
   const c = useColors();
-  const color = variant === 'primary' ? (c.background === '#F6F8F7' ? '#FFFFFF' : '#102A20') : variant === 'danger' ? c.danger : variant === 'ghost' ? c.textSecondary : c.text;
+  const { isDark } = useSettings();
+  const color = variant === 'primary' ? (!isDark ? '#FFFFFF' : '#102A20') : variant === 'danger' ? c.danger : variant === 'ghost' ? c.textSecondary : c.text;
   const background = variant === 'primary' ? c.primary : variant === 'danger' ? c.dangerDim : variant === 'ghost' ? 'transparent' : c.surface;
   return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel || label} accessibilityState={{ disabled: !!(disabled || loading), busy: !!loading }} disabled={disabled || loading} onPress={onPress}
     style={({ pressed }) => [{ minHeight: small ? 40 : 46, paddingHorizontal: small ? 13 : 18, paddingVertical: 10, borderRadius: 10, borderWidth: 1, borderColor: variant === 'secondary' ? c.border : 'transparent', backgroundColor: background, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: disabled ? 0.45 : pressed ? 0.75 : 1 }, style]}>

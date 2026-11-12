@@ -3,7 +3,7 @@ import { Pressable, useWindowDimensions, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '@/contexts/SettingsContext';
-import { useSession } from '@/contexts/SessionContext';
+import { useDevice } from '@/contexts/DeviceContext';
 import { useReports } from '@/contexts/ReportsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { Badge, Button, Card, EmptyState, IconTile, Notice, Page, PageHeader, SectionHeading, Text } from '@/components/ui';
@@ -15,7 +15,7 @@ import { deriveChecks, formatBytes, formatDate, formatPercent, formatTime, stora
 export default function OverviewScreen() {
   const c = useColors();
   const { width } = useWindowDimensions();
-  const { snapshot, loading, refreshing, error, refresh, lastUpdated } = useSession();
+  const { snapshot, loading, refreshing, error, refresh, lastUpdated } = useDevice();
   const { reports, saveReport, ready } = useReports();
   const { show } = useToast();
   const [saving, setSaving] = useState(false);
@@ -44,7 +44,7 @@ export default function OverviewScreen() {
     <PageHeader title="Overview" subtitle="Your device, a little better understood." actions={<><Button label="Refresh" icon="refresh-outline" variant="secondary" loading={refreshing} onPress={() => { void refresh(); }} small /><Button label="Save snapshot" icon="download-outline" variant="secondary" disabled={!snapshot || !ready} loading={saving} onPress={() => { void saveSnapshot(); }} small /></>} />
     {error && <View style={{ marginBottom: 16 }}><Notice tone="danger" icon="alert-circle-outline">{error}</Notice></View>}
     <View style={{ flexDirection: split ? 'row' : 'column', gap: 18, marginBottom: 22 }}>
-      <Card style={{ flex: split ? 1.65 : undefined, backgroundColor: c.hero, borderColor: c.background === '#F6F8F7' ? '#D8E6D6' : c.border, padding: compact ? 22 : 28, minHeight: 248 }}>
+        <Card style={{ flex: split ? 1.65 : undefined, backgroundColor: c.hero, borderColor: c.border, padding: compact ? 22 : 28, minHeight: 248 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 17 }}><Ionicons name="sparkles-outline" size={15} color={c.heroText} /><Text style={{ color: c.heroText, fontSize: 9, letterSpacing: 1.6, fontWeight: '700' }}>A FRESH PERSPECTIVE</Text></View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}><View style={{ flex: 1, zIndex: 1, gap: 12 }}><Text style={{ fontSize: compact ? 29 : 34, lineHeight: compact ? 36 : 42, fontWeight: '700', letterSpacing: -1.2, color: c.heroText }}>{loading ? 'Getting to know\nyour device.' : attention ? 'A little care\nmakes a difference.' : checks.length ? 'Looking good,\nfrom here.' : 'A clearer picture\nstarts here.'}</Text><Text style={{ color: c.heroText, opacity: 0.8, fontSize: 12, lineHeight: 20, maxWidth: 305 }}>{loading ? 'Checking the readings your platform makes available.' : attention ? `${attention} ${attention === 1 ? 'check could' : 'checks could'} use your attention. See what’s going on below.` : checks.length ? 'Your available checks look good. Keep a snapshot to remember this moment.' : 'Explore the readings your browser can share. No guesses, no invented scores.'}</Text><View style={{ flexDirection: 'row', marginTop: 3 }}><Button label="Run a quick check" icon="arrow-forward" onPress={() => router.push('/stress')} small /></View></View>{!compact && <View style={{ marginRight: -12, marginLeft: -15 }}><DeviceArt /></View>}</View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 20 }}><Ionicons name="shield-checkmark-outline" size={13} color={c.heroText} /><Text style={{ fontSize: 10, color: c.heroText, opacity: 0.75 }}>{checks.length} supported checks · {lastUpdated ? `Updated ${formatTime(lastUpdated)}` : 'Private by design'}</Text></View>

@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DEFAULT_PREFERENCES, parsePreferences, type Preferences } from '@/lib/preferences';
+import { DEFAULT_PREFERENCES, parsePreferences, preferencesSchema, type Preferences } from '@/lib/preferences';
 import { SETTINGS_KEY } from '@/lib/reports';
 import { darkColors, lightColors, type ThemeColors } from '@/constants/colors';
 
@@ -14,30 +14,46 @@ interface SettingsValue {
   ready: boolean;
 }
 const SettingsContext = createContext<SettingsValue | null>(null);
+
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const system = useColorScheme();
   const [preferences, setPreferences] = useState<Preferences>(DEFAULT_PREFERENCES);
   const [storageError, setStorageError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
-  const current = useRef(preferences);
+  const current = useRef<Preferences>(DEFAULT_PREFERENCES);
   const queue = useRef<Promise<unknown>>(Promise.resolve());
+  const mounted = useRef(true);
   useEffect(() => {
-    let mounted = true;
-    AsyncStorage.getItem(SETTINGS_KEY).then(raw => {
-      if (!mounted) return;
-      const saved = parsePreferences(raw); current.current = saved; setPreferences(saved);
-    }).catch(() => { if (mounted) setStorageError('Preferences could not be loaded. Changes apply for this session until storage is available.'); })
-      .finally(() => { if (mounted) setReady(true); });
-    return () => { mounted = false; };
-  }, []);
-  const updatePreferences = useCallback((patch: Partial<Preferences>) => {
-    const next = { ...current.current, ...patch };
-    current.current = next; setPreferences(next);
-    const task = queue.current.catch(() => undefined).then(() => AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(next)));
-    queue.current = task;
-    return task.then(() => setStorageError(null)).catch(() => {
-      setStorageError('Your change is active but could not be saved. Device storage may be full or restricted.');
+    mounted.current = true;
+    // Updates queue behind hydration: an early tap cannot overwrite the saved collection.
+    queue.current = queue.current.then(async () => {
+      try {
+        const saved = parsePreferences(await AsyncStorage.getItem(SETTINGS_KEY));
+        current.current = saved;
+        if (mounted.current) setPreferences(saved);
+      } catch {
+        if (mounted.current) setStorageError('Saved preferences could not be read. Existing data is unchanged; changes apply for this session until saving succeeds.');
+      } finally {
+        if (mounted.current) setReady(true);
+      }
     });
+    return () => { mounted.current = false; };
+  }, []);
+
+  const updatePreferences = useCallback((patch: Partial<Preferences>) => {
+    const task = queue.current.catch(() => undefined).then(async () => {
+      const next = preferencesSchema.parse({ ...current.current, ...patch });
+      current.current = next;
+      if (mounted.current) setPreferences(next);
+      try {
+        await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+        if (mounted.current) setStorageError(null);
+      } catch {
+        if (mounted.current) setStorageError('Your change is active but could not be saved. Device storage may be full or restricted.');
+      }
+    });
+    queue.current = task;
+    return task;
   }, []);
   const isDark = preferences.theme === 'dark' || (preferences.theme === 'system' && system === 'dark');
   const value = useMemo(() => ({ preferences, updatePreferences, colors: isDark ? darkColors : lightColors, isDark, storageError, ready }), [preferences, updatePreferences, isDark, storageError, ready]);
