@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { TextInput, useWindowDimensions, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '@/contexts/SettingsContext';
-import { useSession } from '@/contexts/SessionContext';
+import { useDevice } from '@/contexts/DeviceContext';
 import { useReports } from '@/contexts/ReportsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { Badge, Button, Card, EmptyState, IconButton, IconTile, Notice, Page, PageHeader, SectionHeading, Text } from '@/components/ui';
@@ -13,7 +13,7 @@ import { createSnapshotReport } from '@/lib/reports';
 export default function DeviceScreen() {
   const c = useColors();
   const { width } = useWindowDimensions();
-  const { snapshot, loading, refreshing, error, refresh } = useSession();
+  const { snapshot, loading, refreshing, error, refresh } = useDevice();
   const { saveReport, ready } = useReports();
   const { show } = useToast();
   const [query, setQuery] = useState('');

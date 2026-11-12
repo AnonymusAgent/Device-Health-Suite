@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
-import { useSession } from '@/contexts/SessionContext';
+import { useSession, useSessionControls } from '@/contexts/SessionContext';
+import { useDevice } from '@/contexts/DeviceContext';
 import { useSettings, useColors } from '@/contexts/SettingsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { Badge, Button, Card, ConfirmDialog, IconTile, Notice, Page, PageHeader, SectionHeading, SegmentedControl, Text } from '@/components/ui';
@@ -9,7 +10,9 @@ import { exportDate, exportText } from '@/lib/export';
 
 export default function ActivityScreen() {
   const c = useColors();
-  const { history, live, setLive, snapshot, clearSession } = useSession();
+  const { history, live, clearSession } = useSession();
+  const { setLive } = useSessionControls();
+  const { snapshot } = useDevice();
   const { preferences, updatePreferences } = useSettings();
   const { show } = useToast();
   const { width } = useWindowDimensions();
