@@ -1,0 +1,5 @@
+import { ScrollViewStyleReset } from 'expo-router/html';
+import React from 'react';
+export default function RootHTML({ children }: { children: React.ReactNode }) {
+  return <html lang="en"><head><meta charSet="utf-8" /><meta httpEquiv="X-UA-Compatible" content="IE=edge" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" /><title>Veylo — Device wellbeing</title><meta name="theme-color" content="#11685B" /><meta name="application-name" content="Veylo" /><meta name="description" content="A clearer picture of your device. Private, capability-aware device check-ins, activity insights, and benchmarks." /><link rel="icon" href="/favicon.ico" /><ScrollViewStyleReset /><style dangerouslySetInnerHTML={{ __html: 'body{margin:0;background:#F6F8F7}button,a,input,[role="button"]{touch-action:manipulation}button:focus-visible,a:focus-visible,input:focus-visible,[role="radio"]:focus-visible{outline:3px solid #509C83;outline-offset:3px}*{scrollbar-width:thin;scrollbar-color:#C4D2C8 transparent}::selection{background:#D4E8D8}' }} /></head><body>{children}</body></html>;
+}

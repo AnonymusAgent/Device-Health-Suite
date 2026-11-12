@@ -1,64 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Colors from '@/constants/colors';
-
-interface UsageBarProps {
-  used: number;
-  total: number;
-  usedLabel: string;
-  totalLabel: string;
-  color?: string;
+import { View } from 'react-native';
+import { useColors } from '@/contexts/SettingsContext';
+import { Text } from './ui';
+export function UsageBar({ used, total, usedLabel, totalLabel, color }: { used: number; total: number; usedLabel: string; totalLabel: string; color?: string }) {
+  const c = useColors();
+  const valid = Number.isFinite(total) && total > 0 && Number.isFinite(used) && used >= 0;
+  const ratio = valid ? Math.min(used / total, 1) : 0;
+  return <View style={{ gap: 8, paddingVertical: 12 }}><View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}><Text style={{ fontSize: 12 }}>{usedLabel}</Text><Text style={{ fontSize: 12, color: c.textSecondary }}>{totalLabel}</Text></View><View accessibilityRole="progressbar" accessibilityLabel={usedLabel} accessibilityValue={valid ? { min: 0, max: 100, now: Math.round(ratio * 100) } : undefined} style={{ height: 6, borderRadius: 3, backgroundColor: c.border, overflow: 'hidden' }}><View style={{ height: '100%', width: `${ratio * 100}%`, backgroundColor: color || c.primary }} /></View><Text style={{ fontSize: 10, color: c.textTertiary }}>{valid ? `${Math.round(ratio * 100)}% used` : 'Usage unavailable'}</Text></View>;
 }
-
-export function UsageBar({ used, total, usedLabel, totalLabel, color = Colors.dark.primary }: UsageBarProps) {
-  const pct = total > 0 ? Math.min(used / total, 1) : 0;
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.labels}>
-        <Text style={styles.usedLabel}>{usedLabel}</Text>
-        <Text style={styles.totalLabel}>{totalLabel}</Text>
-      </View>
-      <View style={styles.barBg}>
-        <View style={[styles.barFill, { width: `${pct * 100}%`, backgroundColor: color }]} />
-      </View>
-      <Text style={styles.pctText}>{Math.round(pct * 100)}% used</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  labels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  usedLabel: {
-    color: Colors.dark.text,
-    fontSize: 13,
-    fontWeight: '500' as const,
-  },
-  totalLabel: {
-    color: Colors.dark.textSecondary,
-    fontSize: 13,
-  },
-  barBg: {
-    height: 6,
-    backgroundColor: Colors.dark.border,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  barFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  pctText: {
-    color: Colors.dark.textTertiary,
-    fontSize: 11,
-    marginTop: 4,
-  },
-});
