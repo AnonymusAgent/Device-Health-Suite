@@ -1,67 +1,26 @@
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { queryClient } from "@/lib/query-client";
-import { PremiumProvider } from "@/contexts/PremiumContext";
-import {
-  useFonts,
-  SpaceGrotesk_400Regular,
-  SpaceGrotesk_500Medium,
-  SpaceGrotesk_600SemiBold,
-  SpaceGrotesk_700Bold,
-} from "@expo-google-fonts/space-grotesk";
+import React, { useEffect } from 'react';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useFonts, SpaceGrotesk_400Regular, SpaceGrotesk_600SemiBold, SpaceGrotesk_700Bold } from '@expo-google-fonts/space-grotesk';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { AppShell } from '@/components/AppShell';
+import { SettingsProvider, useSettings } from '@/contexts/SettingsContext';
+import { ReportsProvider } from '@/contexts/ReportsContext';
+import { SessionProvider } from '@/contexts/SessionContext';
+import { ToastProvider } from '@/contexts/ToastContext';
+import { PremiumProvider } from '@/contexts/PremiumContext';
 
-SplashScreen.preventAutoHideAsync();
-
-function RootLayoutNav() {
-  return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="paywall"
-        options={{
-          headerShown: false,
-          presentation: "modal",
-          animation: "slide_from_bottom",
-        }}
-      />
-    </Stack>
-  );
+void SplashScreen.preventAutoHideAsync().catch(() => undefined);
+function Navigation() {
+  const { isDark, preferences } = useSettings();
+  return <><StatusBar style={isDark ? 'light' : 'dark'} /><AppShell><Stack screenOptions={{ headerShown: false, animation: preferences.reduceMotion ? 'none' : 'fade', contentStyle: { backgroundColor: isDark ? '#111C19' : '#F6F8F7' } }}><Stack.Screen name="(tabs)" /><Stack.Screen name="settings" /><Stack.Screen name="privacy" /><Stack.Screen name="reports/[id]" /><Stack.Screen name="paywall" options={{ presentation: 'modal' }} /></Stack></AppShell></>;
 }
-
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    SpaceGrotesk_400Regular,
-    SpaceGrotesk_500Medium,
-    SpaceGrotesk_600SemiBold,
-    SpaceGrotesk_700Bold,
-  });
-
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) return null;
-
-  return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <PremiumProvider>
-          <GestureHandlerRootView>
-            <KeyboardProvider>
-              <StatusBar style="light" />
-              <RootLayoutNav />
-            </KeyboardProvider>
-          </GestureHandlerRootView>
-        </PremiumProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  );
+  const [loaded, fontError] = useFonts({ SpaceGrotesk_400Regular, SpaceGrotesk_600SemiBold, SpaceGrotesk_700Bold });
+  useEffect(() => { if (loaded || fontError) void SplashScreen.hideAsync().catch(() => undefined); }, [loaded, fontError]);
+  if (!loaded && !fontError) return null;
+  return <SafeAreaProvider><GestureHandlerRootView style={{ flex: 1 }}><SettingsProvider><ReportsProvider><SessionProvider><PremiumProvider><ToastProvider><ErrorBoundary><Navigation /></ErrorBoundary></ToastProvider></PremiumProvider></SessionProvider></ReportsProvider></SettingsProvider></GestureHandlerRootView></SafeAreaProvider>;
 }

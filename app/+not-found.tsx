@@ -1,39 +1,5 @@
-// template
-import { Link, Stack } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
-
+import { router } from 'expo-router';
+import { Button, Card, EmptyState, Page } from '@/components/ui';
 export default function NotFoundScreen() {
-  return (
-    <>
-      <Stack.Screen options={{ title: "Oops!" }} />
-      <View style={styles.container}>
-        <Text style={styles.title}>This screen doesn&apos;t exist.</Text>
-
-        <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>Go to home screen!</Text>
-        </Link>
-      </View>
-    </>
-  );
+  return <Page><Card><EmptyState icon="compass-outline" title="A little off the beaten path" description="That screen doesn’t exist. Let’s get you back to your device." action={<Button label="Back to overview" icon="arrow-back" onPress={() => router.replace('/')} />} /></Card></Page>;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-  linkText: {
-    fontSize: 14,
-    color: "#2e78b7",
-  },
-});

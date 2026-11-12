@@ -39,3 +39,11 @@ yarn-error.*
 .vercel
 
 .env
+
+# Validation and generated server output
+dist-server/
+static-build/
+test-results/
+playwright-report/
+artifacts/
+coverage/

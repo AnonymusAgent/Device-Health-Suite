@@ -1,47 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Colors from '@/constants/colors';
-
-interface InfoRowProps {
-  label: string;
-  value: string;
-  valueColor?: string;
-  borderBottom?: boolean;
+import { View } from 'react-native';
+import { useColors } from '@/contexts/SettingsContext';
+import { Text } from './ui';
+export function InfoRow({ label, value, valueColor, borderBottom = true }: { label: string; value: string; valueColor?: string; borderBottom?: boolean }) {
+  const c = useColors();
+  return <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20, paddingVertical: 12, borderBottomWidth: borderBottom ? 1 : 0, borderColor: c.border }}><Text style={{ color: c.textSecondary, fontSize: 13, flex: 1 }}>{label}</Text><Text style={{ color: valueColor || c.text, fontSize: 13, fontWeight: '600', textAlign: 'right', flex: 1.3, lineHeight: 20 }}>{value}</Text></View>;
 }
-
-export function InfoRow({ label, value, valueColor, borderBottom = true }: InfoRowProps) {
-  return (
-    <View style={[styles.row, borderBottom && styles.border]}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={[styles.value, valueColor ? { color: valueColor } : {}]} numberOfLines={1}>
-        {value}
-      </Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  border: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.dark.border,
-  },
-  label: {
-    color: Colors.dark.textSecondary,
-    fontSize: 14,
-    flex: 1,
-  },
-  value: {
-    color: Colors.dark.text,
-    fontSize: 14,
-    fontWeight: '500' as const,
-    textAlign: 'right',
-    maxWidth: '60%' as any,
-  },
-});
